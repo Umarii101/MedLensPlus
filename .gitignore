@@ -1,0 +1,49 @@
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor / IDE
+.idea/
+.vscode/
+*.iml
+
+# Logs
+*.log
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.python-version
+.venv/
+venv/
+env/
+ENV/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Android / Gradle
+.gradle/
+local.properties
+**/build/
+captures/
+.cxx/
+*.apk
+*.aab
+*.ap_
+*.dex
+
+# Temporary / archives
+*.tmp
+*.temp
+*.swp
+*.swo
+*.zip
+
+# Optional environment files
+.env
+.env.*
+
