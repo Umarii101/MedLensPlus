@@ -14,8 +14,8 @@ interface ChatApiService {
     @POST
     suspend fun sendChatMessage(
         @Url fullUrl: String,
-        @Part("user_message") userMessage: RequestBody,
+        @Part("message") userMessage: RequestBody,
         @Part("chat_id") chatId: RequestBody?,
-        @Part image: MultipartBody.Part?
+        @Part file: MultipartBody.Part?
     ): Response<ResponseBody>
 }

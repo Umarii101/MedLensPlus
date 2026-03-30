@@ -32,7 +32,7 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
     val messages = mutableStateListOf<UiMessage>()
     val debugLogs = mutableStateListOf<String>()
 
-    var baseUrl by mutableStateOf("http://172.20.10.2:8000")
+    var baseUrl by mutableStateOf("http://192.168.1.100:8000")
     var endpointPath by mutableStateOf("api/chat/")
     var chatId by mutableStateOf("")
     var inputMessage by mutableStateOf("")
@@ -56,7 +56,7 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
         if (isLoading) return
 
         addDebugLog(
-            "Sending request: baseUrl=$baseUrl, endpoint=$endpointPath, chatIdPresent=${chatId.isNotBlank()}, imagePresent=${selectedImageUri != null}, messageLength=${userText.length}"
+            "→ POST $baseUrl$endpointPath (chatId=${chatId.takeIf { it.isNotBlank() } ?: "none"}, photo=${selectedImageUri != null})"
         )
 
         messages.add(UiMessage(fromUser = true, text = userText.ifBlank { "[Image only]" }, imageUri = selectedImageUri))
@@ -83,9 +83,18 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
                     addDebugLog("Success: responseLength=${responseText.length}")
                     Log.d(TAG, "Request succeeded")
                 }.onFailure { throwable ->
-                    messages.add(UiMessage(fromUser = false, text = "Request failed: ${throwable.message}"))
-                    statusText = "Error"
-                    addDebugLog("Failure: ${throwable.message}")
+                    val errorMsg = when {
+                        throwable.message?.contains("connect") == true -> 
+                            "Connection failed. Check: 1) Server is running, 2) Correct IP entered, 3) Phone and PC on same network"
+                        throwable.message?.contains("timeout") == true -> 
+                            "Timeout. Server not responding. Check if running and IP is correct."
+                        throwable.message?.contains("refused") == true -> 
+                            "Connection refused. Server may not be running on this IP."
+                        else -> "Error: ${throwable.message}"
+                    }
+                    messages.add(UiMessage(fromUser = false, text = errorMsg))
+                    statusText = "Connection Error"
+                    addDebugLog("Failed: ${throwable::class.simpleName} - ${throwable.message}")
                     Log.e(TAG, "Request failed", throwable)
                 }
 

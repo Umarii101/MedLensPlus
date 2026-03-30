@@ -45,7 +45,7 @@ class ChatRepository(
                 fullUrl = fullUrl,
                 userMessage = userBody,
                 chatId = chatIdBody,
-                image = imagePart
+                file = imagePart
             )
 
             val responseBody = response.body()?.string().orEmpty()
@@ -97,7 +97,7 @@ class ChatRepository(
         )
 
         val requestBody: RequestBody = tempFile.asRequestBody(mimeType.toMediaTypeOrNull())
-        return MultipartBody.Part.createFormData("image", tempFile.name, requestBody)
+        return MultipartBody.Part.createFormData("file", tempFile.name, requestBody)
     }
 
     private fun extractTextResponse(raw: String): String {
