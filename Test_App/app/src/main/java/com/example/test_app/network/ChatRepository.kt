@@ -20,13 +20,15 @@ class ChatRepository(
         private const val TAG = "ChatRepository"
     }
 
+    data class ChatResult(val message: String, val chatId: String?)
+
     suspend fun sendMessage(
         baseUrl: String,
         endpointPath: String,
         userMessage: String,
         chatId: String?,
         imageUri: Uri?
-    ): Result<String> {
+    ): Result<ChatResult> {
         return try {
             val fullUrl = buildUrl(baseUrl, endpointPath)
             Log.d(
@@ -53,7 +55,7 @@ class ChatRepository(
                 val parsed = extractTextResponse(responseBody)
                 Log.d(
                     TAG,
-                    "Request success code=${response.code()} rawLength=${responseBody.length} parsedLength=${parsed.length}"
+                    "Request success code=${response.code()} rawLength=${responseBody.length} parsedLength=${parsed.message.length}"
                 )
                 Result.success(parsed)
             } else {
@@ -100,33 +102,41 @@ class ChatRepository(
         return MultipartBody.Part.createFormData("file", tempFile.name, requestBody)
     }
 
-    private fun extractTextResponse(raw: String): String {
-        if (raw.isBlank()) return "(Empty response from server)"
+    private fun extractTextResponse(raw: String): ChatResult {
+        if (raw.isBlank()) return ChatResult("(Empty response from server)", null)
 
         return try {
             val element = JsonParser.parseString(raw)
-            if (!element.isJsonObject) return raw
+            if (!element.isJsonObject) return ChatResult(raw, null)
             val obj = element.asJsonObject
+
+            var parsedChatId: String? = null
+            if (obj.has("chat_id") && !obj.get("chat_id").isJsonNull) {
+                parsedChatId = obj.get("chat_id").asString
+            }
 
             val keys = listOf("response", "message", "answer", "output", "text")
             for (key in keys) {
                 if (obj.has(key) && !obj.get(key).isJsonNull) {
-                    return obj.get(key).asString
+                    return ChatResult(obj.get(key).asString, parsedChatId)
                 }
             }
 
             if (obj.has("data") && obj.get("data").isJsonObject) {
                 val dataObj = obj.getAsJsonObject("data")
+                if (dataObj.has("chat_id") && !dataObj.get("chat_id").isJsonNull) {
+                    parsedChatId = dataObj.get("chat_id").asString
+                }
                 for (key in keys) {
                     if (dataObj.has(key) && !dataObj.get(key).isJsonNull) {
-                        return dataObj.get(key).asString
+                        return ChatResult(dataObj.get(key).asString, parsedChatId)
                     }
                 }
             }
 
-            raw
+            ChatResult(raw, parsedChatId)
         } catch (_: Exception) {
-            raw
+            ChatResult(raw, null)
         }
     }
 }

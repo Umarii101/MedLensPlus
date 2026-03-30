@@ -77,10 +77,16 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
             )
 
             withContext(Dispatchers.Main) {
-                result.onSuccess { responseText ->
-                    messages.add(UiMessage(fromUser = false, text = responseText))
+                result.onSuccess { responseResult ->
+                    messages.add(UiMessage(fromUser = false, text = responseResult.message))
+                    responseResult.chatId?.let { newChatId ->
+                        if (chatId.isBlank()) {
+                            chatId = newChatId
+                            addDebugLog("Session Chat ID assigned: $newChatId")
+                        }
+                    }
                     statusText = "Response received"
-                    addDebugLog("Success: responseLength=${responseText.length}")
+                    addDebugLog("Success: responseLength=${responseResult.message.length}")
                     Log.d(TAG, "Request succeeded")
                 }.onFailure { throwable ->
                     val errorMsg = when {

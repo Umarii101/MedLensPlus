@@ -47,9 +47,9 @@ def health():
 @app.post("/api/chat/")
 async def chat(
     request: Request,
-    user_message: str = Form(...),
+    message: str = Form(...),
     chat_id: str | None = Form(default=None),
-    image: UploadFile | None = File(default=None),
+    file: UploadFile | None = File(default=None),
 ):
     """
     Chat endpoint - echoes back the user message
@@ -61,28 +61,29 @@ async def chat(
     print(f"[{timestamp}] REQUEST RECEIVED")
     print(f"{'='*60}")
     print(f"Client IP: {client_ip}")
-    print(f"User Message: {user_message[:200]}")
+    print(f"User Message: {message[:200]}")
     print(f"Chat ID: {chat_id}")
-    print(f"Image Present: {image is not None}")
+    print(f"File Present: {file is not None}")
     
-    image_info = None
-    if image is not None:
-        content = await image.read()
-        image_info = {
-            "filename": image.filename,
-            "content_type": image.content_type,
+    file_info = None
+    if file is not None:
+        content = await file.read()
+        file_info = {
+            "filename": file.filename,
+            "content_type": file.content_type,
             "size_bytes": len(content),
         }
-        print(f"Image Details: {image_info}")
+        print(f"File Details: {file_info}")
 
-    response_text = user_message  # Echo back the exact message
+    response_text = message  # Echo back the exact message
     
     response_payload = {
+        "status": "success",
         "response": response_text,
+        "chat_id": chat_id or "9999",
         "received": {
-            "chat_id": chat_id,
-            "has_image": image is not None,
-            "image_info": image_info,
+            "has_file": file is not None,
+            "file_info": file_info,
             "timestamp": timestamp,
             "client_ip": client_ip,
         },

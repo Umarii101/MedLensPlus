@@ -20,8 +20,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -69,6 +72,16 @@ private fun ChatScreen(viewModel: ChatViewModel) {
         viewModel.setSelectedImage(uri)
     }
 
+    var showLogs by remember { mutableStateOf(false) }
+    var showConfig by remember { mutableStateOf(false) }
+    val listState = rememberLazyListState()
+
+    LaunchedEffect(viewModel.messages.size) {
+        if (viewModel.messages.isNotEmpty()) {
+            listState.animateScrollToItem(viewModel.messages.size - 1)
+        }
+    }
+
     if (pickerTrigger) {
         pickerTrigger = false
         imagePicker.launch("image/*")
@@ -77,16 +90,33 @@ private fun ChatScreen(viewModel: ChatViewModel) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(12.dp),
+            .padding(top = 32.dp, start = 12.dp, end = 12.dp, bottom = 12.dp)
+            .imePadding(),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Text(
-            text = "MedLens API Test Client",
-            fontSize = 20.sp,
-            color = MaterialTheme.colorScheme.primary
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "MedLens Test Client",
+                fontSize = 20.sp,
+                color = MaterialTheme.colorScheme.primary
+            )
+            Row {
+                TextButton(onClick = { showConfig = !showConfig }) {
+                    Text(if (showConfig) "Hide Config" else "Config")
+                }
+                TextButton(onClick = { showLogs = !showLogs }) {
+                    Text(if (showLogs) "Hide Logs" else "Logs")
+                }
+            }
+        }
 
-        ServerConfigPanel(viewModel)
+        if (showConfig) {
+            ServerConfigPanel(viewModel)
+        }
 
         Text(
             text = "Status: ${viewModel.statusText}",
@@ -94,9 +124,12 @@ private fun ChatScreen(viewModel: ChatViewModel) {
             color = Color.Gray
         )
 
-        DebugLogPanel(logs = viewModel.debugLogs)
+        if (showLogs) {
+            DebugLogPanel(logs = viewModel.debugLogs)
+        }
 
         LazyColumn(
+            state = listState,
             modifier = Modifier
                 .weight(1f)
                 .fillMaxWidth(),

@@ -11,7 +11,7 @@ desktop.ini
 # Logs
 *.log
 
-# Python
+# Python / Django
 __pycache__/
 *.py[cod]
 *.pyo
@@ -24,7 +24,14 @@ ENV/
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
-
+db.sqlite3
+db.sqlite3-journal
+media/
+media_root/
+static/
+staticfiles/
+uploads/
+Shah_Bahadur_Backend/
 # Android / Gradle
 .gradle/
 local.properties
@@ -36,14 +43,15 @@ captures/
 *.ap_
 *.dex
 
-# Temporary / archives
+# Temporary / Archives
 *.tmp
 *.temp
 *.swp
 *.swo
 *.zip
+*.tar.gz
 
-# Optional environment files
+# Environment
 .env
 .env.*
 
