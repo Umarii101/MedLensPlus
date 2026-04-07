@@ -1,6 +1,12 @@
 from groq import Groq
+import os 
+from dotenv import load_dotenv
 
+# This loads the variables from .env into your system environment
+load_dotenv()
 
+# os.getenv looks for the variable "GROQ_API_KEY" 
+client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
 
 # def llm_call(messages):

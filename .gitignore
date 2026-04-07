@@ -16,3 +16,7 @@ medlens-env/
 
 # logs
 *.log
+
+#env
+.env
+.env

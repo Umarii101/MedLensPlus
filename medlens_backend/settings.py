@@ -28,13 +28,6 @@ DEBUG = True
 
 ALLOWED_HOSTS = ["*"]
 
-import cloudinary
-
-cloudinary.config(
-    cloud_name="dl5vhibvr",
-    api_key="c4jpaHwBkHsBN_ssvCNblV2Yrdc",
-    api_secret="c4jpaHwBkHsBN_ssvCNblV2Yrdc"
-)
 
 # Application definition
 
