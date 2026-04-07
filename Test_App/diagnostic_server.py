@@ -104,7 +104,7 @@ if __name__ == "__main__":
     print(f"Port: 8000")
     print(f"\nAndroid App Configuration:")
     print(f"  Base URL: http://{local_ip}:8000")
-    print(f"  Endpoint: api/chat/")
+    print(f"  Endpoint: /api/chat/")
     print(f"\nServer running on: http://0.0.0.0:8000")
     print(f"Test endpoint: http://{local_ip}:8000/ping")
     print("="*60 + "\n")

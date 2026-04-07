@@ -20,7 +20,7 @@ echo 2. In the Android App, enter:
 echo    Base URL: http://YOUR_PC_IP:8000
 echo    (Example: http://192.168.1.100:8000)
 echo.
-echo 3. Endpoint Path: api/chat/
+echo 3. Endpoint Path: /api/chat/
 echo.
 echo 4. Then start the server below...
 echo.

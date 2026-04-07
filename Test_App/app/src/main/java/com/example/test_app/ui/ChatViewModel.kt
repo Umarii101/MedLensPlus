@@ -33,7 +33,7 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
     val debugLogs = mutableStateListOf<String>()
 
     var baseUrl by mutableStateOf("https://077b538r-8000.asse.devtunnels.ms")
-    var endpointPath by mutableStateOf("api/chat/")
+    var endpointPath by mutableStateOf("/api/chat/")
     var chatId by mutableStateOf("")
     var inputMessage by mutableStateOf("")
     var selectedImageUri by mutableStateOf<Uri?>(null)

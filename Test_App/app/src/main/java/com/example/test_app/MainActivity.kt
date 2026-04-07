@@ -237,7 +237,7 @@ private fun ServerConfigPanel(viewModel: ChatViewModel) {
             value = viewModel.endpointPath,
             onValueChange = { viewModel.endpointPath = it },
             label = { Text("Endpoint Path") },
-            placeholder = { Text("chat") },
+            placeholder = { Text("/api/chat/") },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true
         )
