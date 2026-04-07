@@ -10,6 +10,7 @@ venv/
 env/
 medlens-env/
 
+
 # IDE
 .vscode/
 .idea/
@@ -19,4 +20,6 @@ medlens-env/
 
 #env
 .env
-.env
+
+#Models
+Model/
