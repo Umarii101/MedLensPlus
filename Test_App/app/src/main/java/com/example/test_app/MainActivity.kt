@@ -228,7 +228,7 @@ private fun ServerConfigPanel(viewModel: ChatViewModel) {
             value = viewModel.baseUrl,
             onValueChange = { viewModel.baseUrl = it },
             label = { Text("Base URL") },
-            placeholder = { Text("http://192.168.1.100:8000") },
+            placeholder = { Text("https://077b538r-8000.asse.devtunnels.ms") },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true
         )

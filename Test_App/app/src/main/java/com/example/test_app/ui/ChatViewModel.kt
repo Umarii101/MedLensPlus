@@ -32,7 +32,7 @@ class ChatViewModel(application: Application) : AndroidViewModel(application) {
     val messages = mutableStateListOf<UiMessage>()
     val debugLogs = mutableStateListOf<String>()
 
-    var baseUrl by mutableStateOf("http://192.168.1.100:8000")
+    var baseUrl by mutableStateOf("https://077b538r-8000.asse.devtunnels.ms")
     var endpointPath by mutableStateOf("api/chat/")
     var chatId by mutableStateOf("")
     var inputMessage by mutableStateOf("")
