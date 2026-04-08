@@ -5,7 +5,7 @@ from llama_cpp import Llama
 logger = logging.getLogger(__name__)
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-MODEL_PATH = os.path.join(BASE_DIR, "Models", "medgemma-27b-it-UD-IQ2_XXS.gguf")
+MODEL_PATH = os.path.join(BASE_DIR, "Model", "medgemma-27b-it-UD-IQ2_XXS.gguf")
 
 _llm_instance = None
 
@@ -35,8 +35,8 @@ def get_llm():
                 n_threads=4,            # Match i5-7500 physical core count exactly
                 n_batch=512,            # Prompt processing batch size
                 flash_attn=True,        # Reduces VRAM usage during prompt processing
-                type_k="q8_0",          # KV cache quantization (replaces deprecated f16_kv)
-                type_v="q8_0",          # Saves ~1GB VRAM vs full precision
+                type_k=1,          # KV cache quantization (replaces deprecated f16_kv)
+                type_v=1,          # Saves ~1GB VRAM vs full precision
                 verbose=False,
             )
             logger.info("Model loaded successfully.")
