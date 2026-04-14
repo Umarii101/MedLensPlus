@@ -2,10 +2,16 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
+from rest_framework.permissions import IsAuthenticated
+
+from django.contrib.auth.models import User
+from django.contrib.auth import authenticate
+from rest_framework_simplejwt.tokens import RefreshToken
+
+
 from datetime import datetime
 import logging
 import base64
-
 from .models import Chat
 from .utils import llm_call
 
@@ -13,6 +19,7 @@ logger = logging.getLogger(__name__)
 
 
 class ChatAPIView(APIView):
+    permission_classes = [IsAuthenticated]
 
     def post(self, request):
         try:
@@ -26,14 +33,20 @@ class ChatAPIView(APIView):
             # =====================================
             if chat_id:
                 try:
-                    chat = Chat.objects.get(id=int(chat_id))
+                    chat = Chat.objects.get(
+                        id=int(chat_id),
+                        user=request.user   # 🔐 IMPORTANT
+                    )
                 except (ValueError, Chat.DoesNotExist):
                     return Response({
                         "status": "error",
                         "details": "Invalid chat_id"
                     }, status=400)
             else:
-                chat = Chat.objects.create(details=[])
+                chat = Chat.objects.create(
+                    user=request.user,
+                    details=[]
+                )
 
             current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
@@ -182,3 +195,73 @@ class ChatAPIView(APIView):
                 "details": "Internal server error",
                 "error": str(e)
             }, status=500)
+            
+
+class ChatListAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+    def get(self, request):
+        try:
+            chats = Chat.objects.filter(user=request.user).order_by("-id")
+
+            chat_list = []
+
+            for chat in chats:
+                last_message = None
+                last_timestamp = None
+
+                if chat.details:
+                    last_entry = chat.details[-1]
+                    last_message = last_entry.get("message")
+                    last_timestamp = last_entry.get("timestamp_at")
+
+                chat_list.append({
+                    "chat_id": chat.id,
+                    "last_message": last_message,
+                    "last_timestamp": last_timestamp
+                })
+
+            return Response({
+                "status": "success",
+                "total_chats": len(chat_list),
+                "chats": chat_list
+            }, status=200)
+
+        except Exception as e:
+            return Response({
+                "status": "error",
+                "details": str(e)
+            }, status=500)
+            
+
+class RegisterAPIView(APIView):
+    
+    def post(self, request):
+        username = request.data.get("username")
+        password = request.data.get("password")
+
+        if not username or not password:
+            return Response({"error": "Missing fields"}, status=400)
+
+        if User.objects.filter(username=username).exists():
+            return Response({"error": "User already exists"}, status=400)
+
+        User.objects.create_user(username=username, password=password)
+
+        return Response({"message": "User registered successfully"})
+
+class LoginAPIView(APIView):
+    def post(self, request):
+        user = authenticate(
+            username=request.data.get("username"),
+            password=request.data.get("password")
+        )
+
+        if not user:
+            return Response({"error": "Invalid credentials"}, status=401)
+
+        refresh = RefreshToken.for_user(user)
+
+        return Response({
+            "access": str(refresh.access_token),
+            "refresh": str(refresh)
+        })
