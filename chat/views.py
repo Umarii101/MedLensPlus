@@ -35,7 +35,7 @@ class ChatAPIView(APIView):
                 try:
                     chat = Chat.objects.get(
                         id=int(chat_id),
-                        user=request.user   # 🔐 IMPORTANT
+                        user=request.user
                     )
                 except (ValueError, Chat.DoesNotExist):
                     return Response({
@@ -61,17 +61,14 @@ class ChatAPIView(APIView):
                 message_type = "file"
 
                 try:
-                    # ✅ read once
                     file_bytes = file.read()
 
-                    # ✅ save file
                     file_path = default_storage.save(
                         f"uploads/{file.name}",
                         ContentFile(file_bytes)
                     )
                     file_url = default_storage.url(file_path)
 
-                    # ✅ encode for LLM
                     base64_image = base64.b64encode(file_bytes).decode("utf-8")
 
                 except Exception as file_error:
@@ -90,10 +87,8 @@ class ChatAPIView(APIView):
             for msg in chat.details:
                 role = "user" if msg.get("sender_type") == "User" else "assistant"
 
-                # ✅ IMAGE MEMORY (use stored description)
                 if msg.get("message_type") == "file":
                     description = msg.get("image_description")
-
                     if description:
                         history.append({
                             "role": role,
@@ -101,7 +96,6 @@ class ChatAPIView(APIView):
                         })
                     continue
 
-                # ✅ NORMAL TEXT
                 history.append({
                     "role": role,
                     "content": msg.get("message", "")
@@ -132,7 +126,6 @@ class ChatAPIView(APIView):
                     "content": message_text
                 })
 
-            # optional: limit history size
             history = history[-6:]
 
             # =====================================
@@ -163,12 +156,12 @@ class ChatAPIView(APIView):
                 "message_type": message_type,
                 "message": message_text,
                 "file_url": file_url,
-                "image_description": image_description,  # ✅ NEW
+                "image_description": image_description,
                 "timestamp_at": current_time
             })
 
             # =====================================
-            # 8. SAVE Model RESPONSE
+            # 8. SAVE BOT RESPONSE
             # =====================================
             chat.details.append({
                 "sender_type": "Bot",
@@ -189,16 +182,53 @@ class ChatAPIView(APIView):
 
         except Exception as e:
             logger.exception("Unexpected error in ChatAPIView")
-
             return Response({
                 "status": "error",
                 "details": "Internal server error",
                 "error": str(e)
             }, status=500)
-            
+
+
+class ChatDetailAPIView(APIView):
+    """
+    GET /api/chat/<chat_id>/
+    Returns the full message history for a single chat session.
+    Only the owning user can access their own chats.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, chat_id):
+        try:
+            chat = Chat.objects.get(id=int(chat_id), user=request.user)
+        except (ValueError, Chat.DoesNotExist):
+            return Response({
+                "status": "error",
+                "details": "Chat not found"
+            }, status=404)
+
+        messages = []
+        for msg in chat.details:
+            # Skip image-only entries that have no displayable text
+            if msg.get("message_type") == "file" and not msg.get("message"):
+                continue
+            messages.append({
+                "sender_type": msg.get("sender_type"),
+                "message": msg.get("message", ""),
+                "message_type": msg.get("message_type", "text"),
+                "file_url": msg.get("file_url"),
+                "timestamp_at": msg.get("timestamp_at"),
+            })
+
+        return Response({
+            "status": "success",
+            "chat_id": chat.id,
+            "messages": messages
+        }, status=200)
+
 
 class ChatListAPIView(APIView):
     permission_classes = [IsAuthenticated]
+
     def get(self, request):
         try:
             chats = Chat.objects.filter(user=request.user).order_by("-id")
@@ -231,10 +261,10 @@ class ChatListAPIView(APIView):
                 "status": "error",
                 "details": str(e)
             }, status=500)
-            
+
 
 class RegisterAPIView(APIView):
-    
+
     def post(self, request):
         username = request.data.get("username")
         password = request.data.get("password")
@@ -249,7 +279,9 @@ class RegisterAPIView(APIView):
 
         return Response({"message": "User registered successfully"})
 
+
 class LoginAPIView(APIView):
+
     def post(self, request):
         user = authenticate(
             username=request.data.get("username"),
