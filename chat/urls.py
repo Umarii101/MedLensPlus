@@ -2,7 +2,8 @@ from django.urls import path
 from .views import ChatAPIView, ChatDetailAPIView, ChatListAPIView, RegisterAPIView, LoginAPIView
 from django.conf import settings
 from django.conf.urls.static import static
- 
+from rest_framework_simplejwt.views import TokenRefreshView
+
 urlpatterns = [
     path("chat/", ChatAPIView.as_view()),
     path("chat/<int:chat_id>/", ChatDetailAPIView.as_view()),

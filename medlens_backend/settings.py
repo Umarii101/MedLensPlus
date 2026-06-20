@@ -12,7 +12,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 
 from pathlib import Path
 import os
-
+from datetime import timedelta
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -121,6 +121,19 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
+}
+
+SIMPLE_JWT = {
+    # Access token valid for 7 days — eliminates the "token expired on reopen" bug
+    "ACCESS_TOKEN_LIFETIME": timedelta(days=7),
+    # Refresh token valid for 30 days
+    "REFRESH_TOKEN_LIFETIME": timedelta(days=30),
+    # Issue a new refresh token whenever the user refreshes
+    "ROTATE_REFRESH_TOKENS": True,
+    # Blacklist old refresh tokens after rotation (add 'rest_framework_simplejwt.token_blacklist' to INSTALLED_APPS if you want this)
+    "BLACKLIST_AFTER_ROTATION": False,
+    "AUTH_HEADER_TYPES": ("Bearer",),
+    "AUTH_TOKEN_CLASSES": ("rest_framework_simplejwt.tokens.AccessToken",),
 }
 
 MEDIA_URL = '/media/'
